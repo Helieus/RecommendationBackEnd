@@ -2,15 +2,16 @@
 {
     public class UserAnswersDto
     {
-        public string BudgetLevel { get; set; }
-        public string TransportMode { get; set; }
-        public string PreferredDestinationType { get; set; }
-        public string PreferredActivities { get; set; }
-        public string PreferredAccommodation { get; set; }
-        public string CuisineImportance { get; set; }
-        public string TourismStyle { get; set; }
-        public string TripDuration { get; set; }
-        public string TravelGroup { get; set; }
-        public string SceneryVibe { get; set; }
+        public int BudgetLevelId { get; set; }
+        public int TransportModeId { get; set; }
+        public int PreferredDestinationTypeId { get; set; }
+        public int PreferredActivitiesId { get; set; }
+        public int PreferredAccommodationId { get; set; }
+        public int CuisineImportanceId { get; set; }
+        public int TourismStyleId { get; set; }
+        public int TripDurationId { get; set; }
+        public int TravelGroupId { get; set; }
+        public int SceneryVibeId { get; set; }
     }
+
 }

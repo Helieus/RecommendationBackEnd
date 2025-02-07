@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelRecommendationsAPI.Data;
-using TravelRecommendationsAPI.Models;
 using TravelRecommendationsAPI.DTOs;
+using TravelRecommendationsAPI.Models;
 
 namespace TravelRecommendationsAPI.Controllers
 {
@@ -19,24 +19,27 @@ namespace TravelRecommendationsAPI.Controllers
         }
 
         [HttpPost("submit")]
-        public async Task<IActionResult> SubmitFeedback([FromBody] FeedbackDto feedback)
+        public async Task<IActionResult> SubmitFeedback([FromBody] FeedbackDto feedbackDto)
         {
             var sessionId = Request.Cookies["SessionId"];
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.SessionId == sessionId);
+            if (!Guid.TryParse(sessionId, out var sessionGuid))
+                return BadRequest("Invalid session cookie.");
 
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.SessionId == sessionGuid);
             if (user == null) return NotFound("Session not found.");
 
             var userFeedback = new UserFeedback
             {
                 UserId = user.Id,
-                DestinationId = feedback.DestinationId,
-                FeedbackId = feedback.FeedbackId
+                DestinationId = feedbackDto.DestinationId,
+                FeedbackId = feedbackDto.FeedbackId,
+                Timestamp = DateTime.UtcNow
             };
 
             _context.UserFeedbacks.Add(userFeedback);
             await _context.SaveChangesAsync();
 
-            return Ok();
+            return Ok("Feedback submitted successfully.");
         }
 
         [HttpPost("restart")]
@@ -44,7 +47,7 @@ namespace TravelRecommendationsAPI.Controllers
         {
             // Clear the session cookie
             Response.Cookies.Delete("SessionId");
-            return Ok();
+            return Ok("Session restarted; cookie cleared.");
         }
     }
 }
