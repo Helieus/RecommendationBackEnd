@@ -3,6 +3,23 @@ using TravelRecommendationsAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Get allowed origins from configuration
+var allowedOrigins = builder.Configuration
+    .GetSection("CorsSettings:AllowedOrigins")
+    .Get<string[]>();
+
+// Add CORS services and configure the policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // Keep lazy loading for convenience
 builder.Services.AddDbContext<TravelDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -10,7 +27,6 @@ builder.Services.AddDbContext<TravelDbContext>(options =>
 );
 
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -22,7 +38,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection();
+// Enable CORS middleware using the defined policy
+app.UseCors("CorsPolicy");
+
+// Uncomment if needed: app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
