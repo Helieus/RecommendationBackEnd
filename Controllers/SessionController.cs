@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿/*using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TravelRecommendationsAPI.Data;
 using TravelRecommendationsAPI.Models;
@@ -23,21 +23,33 @@ namespace TravelRecommendationsAPI.Controllers
             var user = new User
             {
                 SessionId = sessionGuid,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow.ToLocalTime()
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Set session ID in a cookie
+            // For local development over HTTP, use Lax and Secure = false.
+            // In production over HTTPS, use SameSite=None and Secure=true.
             Response.Cookies.Append("SessionId", sessionGuid.ToString(), new CookieOptions
             {
-                Expires = DateTime.UtcNow.AddDays(7),
                 HttpOnly = true,
-                Secure = false
+                Secure = false, // Set to 'true' in production (HTTPS)
+                SameSite = SameSiteMode.Lax // Use Lax for local development; in production, you might use None with Secure=true.
             });
 
             return Ok(new { SessionId = sessionGuid });
         }
+
+        [HttpPost("restart")]
+        public async Task<IActionResult> RestartSession()
+        {
+            // Optionally, remove the old session record or ignore it.
+            Response.Cookies.Delete("SessionId");
+
+            // Then start a new session
+            return await StartSession();
+        }
+
     }
-}
+}*/
