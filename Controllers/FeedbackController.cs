@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelRecommendationsAPI.Data;
 using TravelRecommendationsAPI.DTOs;
@@ -21,12 +20,17 @@ namespace TravelRecommendationsAPI.Controllers
         [HttpPost("submit")]
         public async Task<IActionResult> SubmitFeedback([FromBody] FeedbackDto feedbackDto)
         {
-            var sessionId = Request.Cookies["SessionId"];
-            if (!Guid.TryParse(sessionId, out var sessionGuid))
-                return BadRequest("Invalid session cookie.");
+            // Use the last inserted user record
+            var user = await _context.Users.OrderByDescending(u => u.Id).FirstOrDefaultAsync();
+            if (user == null)
+                return NotFound("No user found.");
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.SessionId == sessionGuid);
-            if (user == null) return NotFound("Session not found.");
+            // Check if the provided FeedbackId exists in the FeedbackTypes table
+            var feedbackTypeExists = await _context.FeedbackTypes.AnyAsync(ft => ft.Id == feedbackDto.FeedbackId);
+            if (!feedbackTypeExists)
+            {
+                return BadRequest("Invalid FeedbackId provided.");
+            }
 
             var userFeedback = new UserFeedback
             {
@@ -45,9 +49,8 @@ namespace TravelRecommendationsAPI.Controllers
         [HttpPost("restart")]
         public IActionResult RestartSession()
         {
-            // Clear the session cookie
-            Response.Cookies.Delete("SessionId");
-            return Ok("Session restarted; cookie cleared.");
+            // Since we are not using sessions now, simply return OK.
+            return Ok("Session restarted.");
         }
     }
 }

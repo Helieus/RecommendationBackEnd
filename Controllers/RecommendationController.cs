@@ -26,7 +26,7 @@ namespace TravelRecommendationsAPI.Controllers
             var user = new User
             {
                 SessionId = Guid.NewGuid(),
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 BudgetLevelId = userAnswers.BudgetLevelId,
                 TransportModeId = userAnswers.TransportModeId,
                 PreferredDestinationTypeId = userAnswers.PreferredDestinationTypeId,
@@ -55,11 +55,22 @@ namespace TravelRecommendationsAPI.Controllers
                 return NotFound("No user answers found.");
             }
 
-            // Get all destinations and calculate scores.
+            // Get all destinations.
             var allDestinations = await _context.Destinations.ToListAsync();
+
+            // STRICT FILTERING: Only consider destinations that match the user's preferred destination type.
+            var filteredDestinations = allDestinations
+                                        .Where(dest => dest.DestinationTypeId == user.PreferredDestinationTypeId)
+                                        .ToList();
+
+            if (!filteredDestinations.Any())
+            {
+                return Ok("No matching destinations found for your preferred destination type.");
+            }
+
             var scoredDests = new List<(Destination Destination, int ContentScore, int CollaborativeScore)>();
 
-            foreach (var dest in allDestinations)
+            foreach (var dest in filteredDestinations)
             {
                 int contentScore = CalculateContentScore(user, dest);
                 int collaborativeScore = await CalculateCollaborativeScoreAsync(user, dest);
@@ -67,9 +78,9 @@ namespace TravelRecommendationsAPI.Controllers
             }
 
             var best = scoredDests
-                .Select(s => new { Destination = s.Destination, TotalScore = s.ContentScore + s.CollaborativeScore })
-                .OrderByDescending(x => x.TotalScore)
-                .FirstOrDefault();
+                        .Select(s => new { Destination = s.Destination, TotalScore = s.ContentScore + s.CollaborativeScore })
+                        .OrderByDescending(x => x.TotalScore)
+                        .FirstOrDefault();
 
             if (best == null)
             {
@@ -78,6 +89,7 @@ namespace TravelRecommendationsAPI.Controllers
 
             return Ok(best.Destination);
         }
+
 
         // Helper method to calculate content score.
         private int CalculateContentScore(User user, Destination dest)
