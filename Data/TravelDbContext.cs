@@ -35,7 +35,7 @@ namespace TravelRecommendationsAPI.Data
             // Tells EF that 'FeedbackId' is the foreign key for 'FeedbackType'
             modelBuilder.Entity<UserFeedback>()
                 .HasOne(uf => uf.FeedbackType)
-                .WithMany()  // or .WithMany(ft => ft.UserFeedbacks) if you have that collection
+                .WithMany()  
                 .HasForeignKey(uf => uf.FeedbackId);
 
             base.OnModelCreating(modelBuilder);

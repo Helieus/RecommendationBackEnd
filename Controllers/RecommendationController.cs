@@ -22,7 +22,6 @@ namespace TravelRecommendationsAPI.Controllers
         public async Task<IActionResult> SubmitAnswers([FromBody] UserAnswersDto userAnswers)
         {
             // Create a new user record using the submitted answers.
-            // The SessionId here is a dummy GUID since we’re not using sessions.
             var user = new User
             {
                 SessionId = Guid.NewGuid(),

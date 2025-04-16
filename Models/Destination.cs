@@ -6,7 +6,7 @@ public class Destination
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public int CategoryId { get; set; }
-    [JsonIgnore] // If you don't need the list of users from the attribute side
+    [JsonIgnore] 
 
     public int? BudgetLevelId { get; set; }
     public int? TransportModeId { get; set; }

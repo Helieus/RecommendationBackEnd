@@ -11,6 +11,5 @@ public class UserFeedback
 
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-    // The navigation property
     public virtual FeedbackType FeedbackType { get; set; }
 }
